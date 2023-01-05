@@ -20,7 +20,7 @@ const CellComponent: FunctionComponent<{
         {cell.cat && (
           <img
             className="absolute "
-            src="../images/cat.png"
+            src="https://i.ibb.co/zF5WdBt/cat.png"
             alt="s"
             width={50}
             height={50}
