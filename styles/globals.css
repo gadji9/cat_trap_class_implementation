@@ -28,11 +28,6 @@ body {
 
 .hexagon_black{
   border: 30px solid rgb(63, 65, 63);
-
-  border-top-color: lighten(#789, 5%);
-  border-right-color: lighten(#789, 10%);
-  border-bottom-color: darken(#789, 10%);
-  border-left-color: darken(#789, 5%);
 }
 
 .hexagon_zero{
