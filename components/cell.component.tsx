@@ -19,7 +19,7 @@ const CellComponent: FunctionComponent<{
       >
         {cell.cat && (
           <img
-            className="absolute "
+            className="absolute invert"
             src="https://i.ibb.co/zF5WdBt/cat.png"
             alt="s"
             width={50}

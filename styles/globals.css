@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+
 body {
   overflow-x: hidden;
+  background-color: #333333;
 }
 @font-face {
   font-family: 'Pacifico';
@@ -17,17 +19,17 @@ body {
 
 
 .hexagon_green{
-  border: 30px solid rgb(4, 148, 28);
+  border: 30px solid #ca73bb;
 
-  border-top-color:  rgb(4, 148, 28);
-  border-right-color:  rgb(4, 148, 28);
-  border-bottom-color:  rgb(4, 148, 28);
-  border-left-color:  rgb(4, 148, 28);
+  border-top-color:  #ca73bb;
+  border-right-color: #ca73bb;
+  border-bottom-color: #ca73bb;
+  border-left-color: #ca73bb;
 }
 
 
 .hexagon_black{
-  border: 30px solid rgb(63, 65, 63);
+  border: 30px solid #a6a5a6;
 }
 
 .hexagon_zero{
@@ -60,10 +62,10 @@ body {
 .inside_green{
   width: 50px;
   height: 20px;
-  background-color:rgb(4, 148, 28);
+  background-color:#ca73bb;
 }
 .inside_black{
   width: 50px;
   height: 20px;
-  background-color: rgb(63, 65, 63);
+  background-color: #a6a5a6;
 }

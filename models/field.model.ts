@@ -35,7 +35,7 @@ export class Field {
 
     for (let i = 0; i < this.defaultBlocksCount; ) {
       if(randomX[i] == middleX && randomY[i] == middleY ) {
-          return
+          break
       }
       const cell = this.getCell(randomX[i], randomY[i]);
       if (cell) {
@@ -104,7 +104,6 @@ export class Field {
       this.cat.cell = newCell;
       newCell.cat = this.cat;
     }
-    console.log(this.getNearestCells())
   }
 
   private getDirection() {
