@@ -97,14 +97,16 @@ export class Field {
             return;
         }
 
-        const pathToEdge = this.findPathToEdge(
-            this.cat.cell.x,
-            this.cat.cell.y
-        );
+        let pathToEdge = this.cat.path;
+
+        if (!pathToEdge || this.checkIfPathHasBlackCell(pathToEdge)) {
+            pathToEdge = this.findPathToEdge(this.cat.cell.x, this.cat.cell.y);
+            this.cat.setPath(pathToEdge);
+        }
 
         if (!pathToEdge) {
             const cells = this.getNearestCells();
-            console.log(cells);
+
             let randomNearestCell = cells[0];
             for (let index = 0; index < cells.length; index++) {
                 const curCell = cells[index];
@@ -127,8 +129,7 @@ export class Field {
             return;
         }
 
-        const targetCell = pathToEdge[1]; // Второй элемент массива - это ближайшая свободная клетка к краю
-
+        const targetCell = this.cat.getNextStepPathCell(); // Второй элемент массива - это ближайшая свободная клетка к краю
         if (!targetCell) {
             this.loose();
         }
@@ -137,9 +138,10 @@ export class Field {
         this.cat.cell.setCat(null);
         this.cat.setCell(targetCell);
         targetCell.setCat(this.cat);
+    }
 
-        // Проверяем на победу
-        const nearestFreeCells = this.getNearestCells();
+    checkIfPathHasBlackCell(path: Cell[]) {
+        return path.some((cell) => cell.color === "black");
     }
 
     findPathToEdge(startX: number, startY: number): Cell[] | null {
