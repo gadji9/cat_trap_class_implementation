@@ -1,286 +1,312 @@
+import { makeAutoObservable } from "mobx";
 import { Cat } from "./cat.model.";
 import { Cell } from "./cell.model";
 
+const enum Directions {
+    LEFT = "left",
+    RIGHT = "right",
+    UP = "up",
+    DOWN = "down",
+}
+
 export class Field {
-  public cells: Cell[][] = [];
-  public widht: number = 11;
-  public height: number = 11;
-  public defaultBlocksCount: number = 15;
-  private cat: Cat;
+    public cells: Cell[][] = [];
+    public width: number = 11;
+    public height: number = 11;
+    public defaultBlocksCount: number = 15;
+    private cat: Cat;
 
+    constructor() {
+        this.cells = [];
 
-  constructor() {
-    this.cells = [];
-    
+        let randomX = [];
+        let randomY = [];
 
-    let randomX = [];
-    let randomY = [];
-
-    const [middleX, middleY] = [Math.round(this.widht / 2), Math.round(this.height / 2 - 1)]
-    
-    for (let i = 0; i < Math.round(this.defaultBlocksCount); i++) {
-      randomX.push(Math.floor(Math.random() * this.widht));
-    }
-    for (let i = 0; i < Math.round(this.defaultBlocksCount); i++) {
-      randomY.push(Math.floor(Math.random() * this.height));
-    }
-
-    for (let i = 0; i < this.height; i++) {
-      const row: Cell[] = [];
-      for (let j = 0; j < this.widht; j++) {
-        row.push(new Cell("green", j, i));
-      }
-      this.cells.push(row);
-    }
-
-    for (let i = 0; i < this.defaultBlocksCount; ) {
-      if(randomX[i] == middleX && randomY[i] == middleY ) {
-          break
-      }
-      const cell = this.getCell(randomX[i], randomY[i]);
-      if (cell) {
-          cell.color = "black";
-          i++;
-      }
-    }
-    const middleCell = this.getCell(middleX, middleY)!
-    middleCell.color="green"
-    this.cat = new Cat(
-      middleCell
-    );
-    
-  }
-
-
-  public getCopyField() {
-    const newField = new Field();
-    newField.cells = this.cells;
-    newField.cat = this.cat;
-    return newField;
-  }
-  public getCell(x: number, y: number) {
-    if (this.cells[y]) {
-      return this.cells[y][x];
-    }
-    return null;
-  }
-
-  public endTurn(cell: Cell) {
-    if (cell.cat || cell.color === "black") {
-      return;
-    }
-
-    cell.color = "black";
-
-    this.moveCat();
-  }
-
-  public moveCat() {
-    if (!this.cat) {
-      return;
-    }
-    let [x, y] = this.getDirection();
-
-    const nearestCells = this.getNearestCells();
-
-    const nearestFreeCells = nearestCells.filter(
-      (cell) => cell?.color === "green"
-    );
-
-    if (this.checkForLoose(x, y) || this.checkForWin(nearestFreeCells)) {
-      window.location.reload();
-    }
-
-    let newCell = this.getCell(this.cat.cell.x + x, this.cat.cell.y + y);
-
-    while (newCell?.color === "black") {
-      newCell =
-        nearestFreeCells[
-          Math.round(Math.random() * (nearestFreeCells.length - 1))
+        const [middleX, middleY] = [
+            Math.round(this.width / 2),
+            Math.round(this.height / 2 - 1),
         ];
-    }
-    if (newCell) {
-      this.cat.cell.cat = null;
-      this.cat.cell = newCell;
-      newCell.cat = this.cat;
-    }
-  }
 
-  private getDirection() {
-    let dir: "x" | "y";
-
-    let toFreeDistY = Math.abs(this.cat.cell.y - this.height);
-    let toFreeDistX = Math.abs(this.cat.cell.x - this.widht);
-
-    if (toFreeDistX < toFreeDistY) {
-      dir = "x";
-    } else {
-      dir = "y";
-    }
-
-    const { half1, half2 } = this.countBlocks(this.cells, dir);
-
-    if (toFreeDistX < toFreeDistY) {
-      dir = "x";
-    } else {
-      dir = "y";
-    }
-
-    let mostBlockedHalf;
-    if (dir === "x") {
-      if (half1.count > half2.count) {
-        const half = this.countBlocks(half1.cells, "y");
-
-        if (half.half1.count > half.half2.count) {
-          mostBlockedHalf = half.half1;
-        } else {
-          // 2
-
-          mostBlockedHalf = half.half2;
+        for (let i = 0; i < Math.round(this.defaultBlocksCount); i++) {
+            randomX.push(Math.floor(Math.random() * this.width));
         }
-      } else {
-        const half = this.countBlocks(half2.cells, "y");
-
-        if (half.half1.count > half.half2.count) {
-          mostBlockedHalf = half.half1;
-        } else {
-          mostBlockedHalf = half.half2;
+        for (let i = 0; i < Math.round(this.defaultBlocksCount); i++) {
+            randomY.push(Math.floor(Math.random() * this.height));
         }
-      }
-    } else {
-      if (half1.count > half2.count) {
-        const half = this.countBlocks(half1.cells, "x");
 
-        if (half.half1.count > half.half2.count) {
-          mostBlockedHalf = half.half1;
-        } else {
-          mostBlockedHalf = half.half2;
+        for (let i = 0; i < this.height; i++) {
+            const row: Cell[] = [];
+            for (let j = 0; j < this.width; j++) {
+                row.push(new Cell("green", j, i));
+            }
+            this.cells.push(row);
         }
-      } else {
-        const half = this.countBlocks(half2.cells, "x");
 
-        if (half.half1.count > half.half2.count) {
-          mostBlockedHalf = half.half1;
-        } else {
-          mostBlockedHalf = half.half2;
+        for (let i = 0; i < this.defaultBlocksCount; ) {
+            if (randomX[i] == middleX && randomY[i] == middleY) {
+                break;
+            }
+            const cell = this.getCell(randomX[i], randomY[i]);
+            if (cell) {
+                cell.setColor("black");
+                i++;
+            }
         }
-      }
-    }
-    const middleCell =
-      mostBlockedHalf.cells[Math.floor(mostBlockedHalf.cells.length / 2)][
-        Math.floor(
-          mostBlockedHalf.cells[Math.floor(mostBlockedHalf.cells.length / 2)]
-            .length / 2
-        )
-      ];
+        const middleCell = this.getCell(middleX, middleY)!;
+        middleCell.setColor("green");
+        this.cat = new Cat(middleCell);
 
-    const delta = {
-      x: middleCell.x - this.cat.cell.x,
-      y: middleCell.y - this.cat.cell.y,
-    };
-
-    let dirX = (delta.x / Math.abs(delta.x) || 0) * -1;
-    let diry = (delta.y / Math.abs(delta.y) || 0) * -1;
-
-    if (this.cat.cell.y % 2 === 0) {
-      dirX = dirX < 0 ? dirX + 1 : dirX;
-    } else {
-      dirX = dirX > 0 ? dirX - 1 : dirX;
+        makeAutoObservable(this);
     }
 
-    return [dirX, diry];
-  }
+    setCells(cells: Cell[][]) {
+        this.cells = cells;
+    }
 
-  private countBlocks(cells: Cell[][], dir: "x" | "y") {
-    let half1: Cell[][] = [];
-    let half2: Cell[][] = [];
+    setCat(cat: Cat) {
+        this.cat = cat;
+    }
 
-    cells.forEach((row) => {
-      let row1: Cell[] = [];
-      let row2: Cell[] = [];
+    public getCopyField() {
+        const newField = new Field();
+        newField.setCells(this.cells);
+        newField.setCat(this.cat);
+        return newField;
+    }
 
-      row.forEach((cell) => {
-        if (cell[dir] > this.cat.cell[dir]) {
-          row1.push(cell);
-        } else {
-          row2.push(cell);
+    public getCell(x: number, y: number) {
+        if (this.cells[y]) {
+            return this.cells[y][x];
         }
-      });
-      if (row1.length) {
-        half1.push(row1);
-      }
-      if (row2.length) {
-        half2.push(row2);
-      }
-    });
-
-    const half1Blocks = half1.reduce((prev, curr) => {
-      return (
-        prev +
-        curr.reduce((prev, curr) => {
-          return prev + (curr.color === "black" ? 1 : 0);
-        }, 0)
-      );
-    }, 0);
-
-    const half2Blocks = half2.reduce((prev, curr) => {
-      return (
-        prev +
-        curr.reduce((prev, curr) => {
-          return prev + (curr.color === "black" ? 1 : 0);
-        }, 0)
-      );
-    }, 0);
-
-    return {
-      half1: {
-        cells: half1,
-        count: half1Blocks,
-      },
-      half2: {
-        cells: half2,
-        count: half2Blocks,
-      },
-    };
-  }
-
-  getNearestCells() {
-    const nearestCells: Cell[] = [];
-
-    if (this.cat.cell.y % 2 === 0) {
-      nearestCells.push(this.getCell(this.cat.cell.x + 1, this.cat.cell.y)!);
-      nearestCells.push(this.getCell(this.cat.cell.x - 1, this.cat.cell.y)!);
-      nearestCells.push(this.getCell(this.cat.cell.x + 1, this.cat.cell.y + 1)!);
-      nearestCells.push(this.getCell(this.cat.cell.x + 1, this.cat.cell.y - 1)!);
-      nearestCells.push(this.getCell(this.cat.cell.x, this.cat.cell.y + 1)!);
-      nearestCells.push(this.getCell(this.cat.cell.x, this.cat.cell.y - 1)!);
-    } else {
-      nearestCells.push(this.getCell(this.cat.cell.x + 1, this.cat.cell.y)!);
-      nearestCells.push(this.getCell(this.cat.cell.x - 1, this.cat.cell.y)!);
-      nearestCells.push(this.getCell(this.cat.cell.x, this.cat.cell.y + 1)!);
-      nearestCells.push(this.getCell(this.cat.cell.x, this.cat.cell.y - 1)!);
-      nearestCells.push(this.getCell(this.cat.cell.x - 1, this.cat.cell.y - 1)!);
-      nearestCells.push(this.getCell(this.cat.cell.x - 1, this.cat.cell.y + 1)!);
+        return null;
     }
-    return nearestCells;
-  }
 
-  checkForLoose(vectorX: number, vectorY: number) {
-    if (
-      this.cat.cell.x + vectorX > this.widht - 1 ||
-      this.cat.cell.x + vectorX < 0 ||
-      this.cat.cell.y + vectorY > this.height - 1 ||
-      this.cat.cell.y + vectorY < 0
-    ) {
-      alert("looser");
-      return true;
-    }
-  }
+    public endTurn(cell: Cell) {
+        if (cell.cat || cell.color === "black") {
+            return;
+        }
 
-  checkForWin(nearestFreeCells: (Cell | null)[]) {
-    if (nearestFreeCells.length <= 0) {
-      alert("winer");
-      return true;
+        cell.setColor("black");
+
+        // После каждого вашего хода, переместим кошку на одну ближайшую клетку к краю
+        this.moveCat();
     }
-  }
+
+    moveCat() {
+        if (!this.cat) {
+            return;
+        }
+
+        const pathToEdge = this.findPathToEdge(
+            this.cat.cell.x,
+            this.cat.cell.y
+        );
+
+        if (!pathToEdge) {
+            const cells = this.getNearestCells();
+            console.log(cells);
+            let randomNearestCell = cells[0];
+            for (let index = 0; index < cells.length; index++) {
+                const curCell = cells[index];
+
+                if (curCell.color === "black") {
+                    if (cells.length - 1 === index) {
+                        this.win();
+                        return;
+                    }
+                    continue;
+                }
+
+                randomNearestCell = curCell;
+                break;
+            }
+
+            this.cat.cell.setCat(null);
+            this.cat.setCell(randomNearestCell!);
+            randomNearestCell!.setCat(this.cat);
+            return;
+        }
+
+        const targetCell = pathToEdge[1]; // Второй элемент массива - это ближайшая свободная клетка к краю
+
+        if (!targetCell) {
+            this.loose();
+        }
+
+        // Перемещаем кошку
+        this.cat.cell.setCat(null);
+        this.cat.setCell(targetCell);
+        targetCell.setCat(this.cat);
+
+        // Проверяем на победу
+        const nearestFreeCells = this.getNearestCells();
+    }
+
+    findPathToEdge(startX: number, startY: number): Cell[] | null {
+        const visited: Set<Cell> = new Set();
+        const queue: { cell: Cell; path: Cell[] }[] = [];
+
+        const startCell = this.getCell(startX, startY);
+        queue.push({ cell: startCell!, path: [startCell!] });
+        visited.add(startCell!);
+
+        while (queue.length > 0) {
+            const { cell, path } = queue.shift()!;
+
+            // Проверяем, достигла ли кошка края поля
+            if (this.isEdgeCell(cell)) {
+                return path;
+            }
+
+            // Добавляем соседние свободные клетки в очередь для поиска
+            const neighbors = this.getAvailableDirections(cell.x, cell.y).map(
+                (dir) => this.getNewCoordinates(cell.x, cell.y, dir)
+            );
+            for (const [nx, ny] of neighbors) {
+                const neighborCell = this.getCell(nx, ny);
+                if (
+                    neighborCell &&
+                    neighborCell.color !== "black" &&
+                    !visited.has(neighborCell)
+                ) {
+                    visited.add(neighborCell);
+                    queue.push({
+                        cell: neighborCell,
+                        path: [...path, neighborCell],
+                    });
+                }
+            }
+        }
+
+        return null;
+    }
+
+    getAvailableDirections(
+        x: number,
+        y: number
+    ): ("left" | "right" | "up" | "down")[] {
+        const availableDirections: ("left" | "right" | "up" | "down")[] = [];
+        const directions: { dx: number; dy: number }[] = [
+            { dx: -1, dy: 0 }, // left
+            { dx: 1, dy: 0 }, // right
+            { dx: 0, dy: -1 }, // up
+            { dx: 0, dy: 1 }, // down
+        ];
+
+        for (const dir of directions) {
+            const newX = x + dir.dx;
+            const newY = y + dir.dy;
+            const cell = this.getCell(newX, newY);
+            if (cell && cell.color !== "black") {
+                availableDirections.push(this.getDirectionName(dir.dx, dir.dy));
+            }
+        }
+
+        return availableDirections;
+    }
+
+    getNewCoordinates(
+        x: number,
+        y: number,
+        direction: "left" | "right" | "up" | "down"
+    ): [number, number] {
+        const directions: Record<Directions, { dx: number; dy: number }> = {
+            [Directions.LEFT]: { dx: -1, dy: 0 },
+            right: { dx: 1, dy: 0 },
+            up: { dx: 0, dy: -1 },
+            down: { dx: 0, dy: 1 },
+        };
+
+        const { dx, dy } = directions[direction];
+        return [x + dx, y + dy];
+    }
+
+    getDirectionName(dx: number, dy: number): "left" | "right" | "up" | "down" {
+        if (dx === -1) return "left";
+        if (dx === 1) return "right";
+        if (dy === -1) return "up";
+        if (dy === 1) return "down";
+        throw new Error("Invalid direction");
+    }
+
+    isEdgeCell(cell: Cell): boolean {
+        return (
+            cell.x === 0 ||
+            cell.x === this.width - 1 ||
+            cell.y === 0 ||
+            cell.y === this.height - 1
+        );
+    }
+
+    getNearestCells() {
+        const nearestCells: Cell[] = [];
+
+        if (this.cat.cell.y % 2 === 0) {
+            nearestCells.push(
+                this.getCell(this.cat.cell.x + 1, this.cat.cell.y)!
+            );
+            nearestCells.push(
+                this.getCell(this.cat.cell.x - 1, this.cat.cell.y)!
+            );
+            nearestCells.push(
+                this.getCell(this.cat.cell.x + 1, this.cat.cell.y + 1)!
+            );
+            nearestCells.push(
+                this.getCell(this.cat.cell.x + 1, this.cat.cell.y - 1)!
+            );
+            nearestCells.push(
+                this.getCell(this.cat.cell.x, this.cat.cell.y + 1)!
+            );
+            nearestCells.push(
+                this.getCell(this.cat.cell.x, this.cat.cell.y - 1)!
+            );
+        } else {
+            nearestCells.push(
+                this.getCell(this.cat.cell.x + 1, this.cat.cell.y)!
+            );
+            nearestCells.push(
+                this.getCell(this.cat.cell.x - 1, this.cat.cell.y)!
+            );
+            nearestCells.push(
+                this.getCell(this.cat.cell.x, this.cat.cell.y + 1)!
+            );
+            nearestCells.push(
+                this.getCell(this.cat.cell.x, this.cat.cell.y - 1)!
+            );
+            nearestCells.push(
+                this.getCell(this.cat.cell.x - 1, this.cat.cell.y - 1)!
+            );
+            nearestCells.push(
+                this.getCell(this.cat.cell.x - 1, this.cat.cell.y + 1)!
+            );
+        }
+        return nearestCells;
+    }
+
+    checkForLoose(vectorX: number, vectorY: number) {
+        if (
+            this.cat.cell.x + vectorX > this.width - 1 ||
+            this.cat.cell.x + vectorX < 0 ||
+            this.cat.cell.y + vectorY > this.height - 1 ||
+            this.cat.cell.y + vectorY < 0
+        ) {
+            this.loose();
+        }
+    }
+
+    checkForWin(nearestFreeCells: (Cell | null)[]) {
+        if (nearestFreeCells.length <= 0) {
+            this.win();
+        }
+    }
+
+    loose() {
+        alert("looser");
+        window.location.reload();
+    }
+
+    win() {
+        alert("winer");
+        window.location.reload();
+    }
 }

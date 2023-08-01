@@ -1,5 +1,6 @@
 import { colors } from "../types/colors";
 import { Cat } from "./cat.model.";
+import { makeAutoObservable } from "mobx";
 
 export class Cell {
   public cat: Cat | null = null;
@@ -11,5 +12,14 @@ export class Cell {
     this.color = color;
     this.x = x;
     this.y = y;
+    makeAutoObservable(this);
+  }
+
+  setCat(cat: Cat | null) {
+    this.cat = cat
+  }
+
+  setColor(color: colors) {
+    this.color = color
   }
 }

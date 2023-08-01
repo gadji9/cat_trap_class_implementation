@@ -3,14 +3,14 @@ import { Field } from "../models/field.model";
 import FieldComponent from "../components/field.component";
 
 export default function Home() {
-  const [field, setField] = useState<Field>(new Field());
+  const [field, setField] = useState<Field | undefined>();
   useEffect(() => {
     restart();
   }, []);
 
   function restart() {
     const newField = new Field();
-    setField(newField);
+      setField(newField);
   }
 
   return (

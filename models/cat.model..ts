@@ -1,5 +1,5 @@
+import { makeAutoObservable } from "mobx";
 import { Cell } from "./cell.model";
-import { Field } from "./field.model";
 
 export class Cat {
   public cell: Cell;
@@ -7,5 +7,10 @@ export class Cat {
   constructor(cell: Cell) {
     this.cell = cell;
     this.cell.cat = this;
+    makeAutoObservable(this);
+  }
+
+  setCell(cell: Cell) {
+    this.cell = cell
   }
 }

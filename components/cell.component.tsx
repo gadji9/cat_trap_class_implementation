@@ -1,6 +1,7 @@
 import { FunctionComponent } from "react";
 import { Cell } from "../models/cell.model";
 import Image from "next/image";
+import { observer } from "mobx-react-lite";
 
 const CellComponent: FunctionComponent<{
   cell: Cell;
@@ -38,4 +39,4 @@ const CellComponent: FunctionComponent<{
   );
 };
 
-export default CellComponent;
+export default observer(CellComponent);

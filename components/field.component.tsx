@@ -1,41 +1,38 @@
+import { observer } from "mobx-react-lite";
+
 import {
   Dispatch,
   Fragment,
   FunctionComponent,
   SetStateAction,
-  use,
-  useEffect,
+  useState,
 } from "react";
 import { Cell } from "../models/cell.model";
 import { Field } from "../models/field.model";
 import CellComponent from "./cell.component";
 
 interface IFieldProps {
-  field: Field;
-  setField: Dispatch<SetStateAction<Field>>;
+  field: Field | undefined;
+  setField: Dispatch<SetStateAction<Field | undefined>>;
 }
 
 const FieldCompinent: FunctionComponent<IFieldProps> = ({
   field,
   setField,
 }) => {
+
   function endTurn(cell: Cell) {
-    field.endTurn(cell);
-
-    updateField();
+    field?.endTurn(cell);
   }
 
-  function updateField() {
-    const newField = field.getCopyField();
-    setField(newField);
-  }
+
 
   return (
     <div>
-      {field.cells.map((row, index) => (
+      {field?.cells?.map((row, index) => (
         <Fragment key={index}>
           <div className={"flex " + (index % 2 === 0 ? "ml-[28px]" : "")}>
-            {row.map((cell) => (
+            {row?.map((cell) => (
               <div key={cell.x.toString() + cell.y.toString()}>
                 <CellComponent cell={cell} onClick={endTurn} />
               </div>
@@ -47,4 +44,4 @@ const FieldCompinent: FunctionComponent<IFieldProps> = ({
   );
 };
 
-export default FieldCompinent;
+export default observer(FieldCompinent);
